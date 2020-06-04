@@ -22,7 +22,7 @@ class BurgerBuilder extends Component {
     purchasable: false,
     purchasing: false,
     loading: false,
-    error:false
+    error: false,
   };
 
   componentDidMount() {
@@ -32,7 +32,7 @@ class BurgerBuilder extends Component {
         this.setState({ ingredients: response.data });
       })
       .catch((err) => {
-        this.setState({error:true});
+        this.setState({ error: true });
       });
   }
 
@@ -54,29 +54,17 @@ class BurgerBuilder extends Component {
 
   purchaseContinueHandler = () => {
     // alert('You Continue');
-    this.setState({ loading: true });
-    const order = {
-      ingredients: this.state.ingredients,
-      price: this.state.totalPrice,
-      customer: {
-        name: "Rakshith RS",
-        address: {
-          street: "React Street 1",
-          zipCode: "23453",
-          country: "INDIA",
-        },
-        email: "rakshith@stridefuture.com",
-      },
-      deliveryMethod: "COD",
-    };
-    axios
-      .post("/orders.json", order)
-      .then((response) => {
-        this.setState({ loading: false, purchasing: false });
-      })
-      .catch((error) => {
-        this.setState({ loading: false, purchasing: false });
-      });
+    
+    const queryParam=[];
+    for(let i in this.state.ingredients){
+      queryParam.push(encodeURIComponent(i)+'='+encodeURIComponent(this.state.ingredients[i]));
+    }
+    queryParam.push('price='+this.state.totalPrice);  
+    const queryString=queryParam.join('&');
+    this.props.history.push({
+      pathname: "/checkout",
+      search:'?'+queryString
+    });
   };
 
   addIngredientsHandler = (type) => {
@@ -135,8 +123,12 @@ class BurgerBuilder extends Component {
     if (this.state.loading) {
       orderSummary = <Spinner />;
     }
-    let burger=this.state.error? <p style={{textAlign:'center'}}>Ingredients can't be loaded..!</p>: <Spinner/> ;
-    if(this.state.ingredients){
+    let burger = this.state.error ? (
+      <p style={{ textAlign: "center" }}>Ingredients can't be loaded..!</p>
+    ) : (
+      <Spinner />
+    );
+    if (this.state.ingredients) {
       burger = (
         <React.Fragment>
           <Modal
@@ -157,13 +149,7 @@ class BurgerBuilder extends Component {
         </React.Fragment>
       );
     }
-    
-    return (
-      <React.Fragment>
-        
-        {burger}
-      </React.Fragment>
-    );
+    return <React.Fragment>{burger}</React.Fragment>;
   }
 }
 
