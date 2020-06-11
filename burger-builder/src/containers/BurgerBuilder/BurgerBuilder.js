@@ -1,15 +1,14 @@
 import React, { Component } from "react";
 import { connect } from 'react-redux';
-
+import axios from "../../axios-orders";
 
 import Burger from "../../components/Burger/Burger";
 import BuildControls from "../../components/Burger/BuildControls/BuildControls";
 import Modal from "../../components/UI/Modal/Modal";
 import OrderSummary from "../../components/Burger/OrderSummary/OrderSummary";
-import axios from "../../axios-orders";
 import Spinner from "../../components/UI/Spinner/Spinner";
 import withErrorHandler from "../../hoc/withErrorHandler/withErrorHandler";
-import * as actionTypes from '../../store/actions';
+import * as actions from '../../store/actions/index';
 
 
 
@@ -17,19 +16,11 @@ class BurgerBuilder extends Component {
   state = {
     purchasable: false,
     purchasing: false,
-    loading: false,
-    error: false,
+   
   };
 
   componentDidMount() {
-    /* axios
-      .get("https://burger-builder-7fe76.firebaseio.com/Ingredients.json")
-      .then((response) => {
-        this.setState({ ingredients: response.data });
-      })
-      .catch((err) => {
-        this.setState({ error: true });
-      }); */
+    this.props.onInitIngredients();
   }
 
   updatePurchasable = (ingredients) => {
@@ -49,6 +40,7 @@ class BurgerBuilder extends Component {
   };
 
   purchaseContinueHandler = () => {
+    this.props.onInitPurchase();
     this.props.history.push("/checkout");
   };
 
@@ -67,14 +59,8 @@ class BurgerBuilder extends Component {
         purchaseContinue={this.purchaseContinueHandler}
       />
     );
-    if (this.state.loading) {
-      orderSummary = <Spinner />;
-    }
-    let burger = this.state.error ? (
-      <p style={{ textAlign: "center" }}>Ingredients can't be loaded..!</p>
-    ) : (
-      <Spinner />
-    );
+    
+    let burger = this.props.error ? <p style={{ textAlign: "center" }}>Ingredients can't be loaded..!</p> : <Spinner />;
     if (this.props.ing) {
       burger = (
         <React.Fragment>
@@ -102,14 +88,17 @@ class BurgerBuilder extends Component {
 
 const mapStateToProps=state=>{
   return {
-    ing: state.ingredients,
-    price: state.totalPrice,
+    ing: state.burgerBuilder.ingredients,
+    price: state.burgerBuilder.totalPrice,
+    error: state.burgerBuilder.error,
   };
 }
 const mapDispatchToProps=dispatch=>{
   return{
-    onIngredientsAdded:(name)=>dispatch({type:actionTypes.ADD_INGREDIENT,ingredientName:name}),
-    onIngredientsRemoved:(name)=>dispatch({type:actionTypes.REMOVE_INGREDIENT,ingredientName:name})
+    onIngredientsAdded:(name)=>dispatch(actions.addIngredient(name)),
+    onIngredientsRemoved:(name)=>dispatch(actions.removeIngredient(name)),
+    onInitIngredients:()=>dispatch(actions.initIngredient()),
+    onInitPurchase:()=>dispatch(actions.purchaseInit())
   }
 }
 
