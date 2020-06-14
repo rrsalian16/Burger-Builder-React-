@@ -18,7 +18,7 @@ const asyncOrders = asyncComponent(() => {
 });
 
 const asyncAuth = asyncComponent(() => {
-  return import("./containers/Checkout/Checkout");
+  return import("./containers/Auth/Auth");
 });
 
 class App extends Component {
